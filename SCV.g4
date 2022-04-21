@@ -83,7 +83,8 @@ id_list     : ID id_list_continuation;
 id_list_continuation : ',' id_list
                         | ;
 
-return_type : RETURN data_type;
+return_type : RETURN data_type
+            | ;
 
 block       : BEGIN stmts END ID ';';
 
@@ -113,7 +114,7 @@ loop_block  : while_block
 
 while_block : WHILE expression LOOP stmts END LOOP ';' ;
 
-for_loop    : FOR ID IN direction CTE_INT '..' CTE_INT LOOP stmts END LOOP ';' ;
+for_loop    : FOR ID IN direction factor '..' factor LOOP stmts END LOOP ';' ;
 
 direction   : REVERSE
             | ;
@@ -137,13 +138,80 @@ indexation  : '[' dimensions ']'
 
 dimensions  : CTE_INT dimensions_continuation ;
 
-dimensions_continuation : ',' CTE_INT
+dimensions_continuation : ',' CTE_INT dimensions_continuation
             | ;
 
-expression  :  EXPRESSION;
+//expression  :  EXPRESSION;
 
 data_type   : INT
             | FLOAT;
 
 value_literal   : CTE_INT
                 | CTE_FLOAT ;
+
+// -------------------------------------
+// Expresion
+
+expression	: rel_exp
+		| num_exp 
+		| bool_exp;
+
+bool_exp 	: and_exp next_bool ;
+
+next_bool 	: OR bool_exp 
+		| ;
+
+and_exp 	: not_exp next_and ;
+
+next_and 	: AND and_exp
+		| ;
+
+not_exp 	: NOT bool_term
+		| bool_term;
+
+bool_term	: rel_exp
+		| variable
+		| '(' bool_exp ')' ;
+
+
+rel_exp		: num_exp rel_operator num_exp ;
+
+num_exp		: prod_exp sum_res ;
+
+prod_exp	: factor prod_div ;
+
+prod_div	: prod_op prod_exp
+		| ;
+
+sum_res		: sum_op num_exp
+		| ;
+
+factor		: '(' num_exp ')'
+		| CTE_INT
+		| CTE_FLOAT
+		| variable 
+		| func_call ;
+
+prod_op	: '*'
+		| '/' ;
+
+sum_op	: '+'
+		| '-' ;
+
+rel_operator	: '='
+		        | '<'
+                | '>'
+                | '<='
+                | '>=' ;
+
+
+
+
+
+
+
+
+
+
+
+

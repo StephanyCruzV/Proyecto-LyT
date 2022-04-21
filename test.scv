@@ -1,9 +1,10 @@
 function factorial(n : int) return int is
-        result : int := 1;
-    begin
-        for i in 1..3 loop
-            result := expression;
+    result : int := 1;
+    result : float := 0.0;
+begin
+        for i in 1..(n + 1) loop
+            result := result * i;
         end loop;
 
-        return expression;
-    end factorial;
+        return result;
+end factorial;
