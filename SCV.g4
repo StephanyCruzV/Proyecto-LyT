@@ -61,7 +61,8 @@ program     : vars_decl funcs_decl;
 vars_decl   : var_decl vars_decl
             | ;
 
-var_decl    : ID ':' data_type value_init ';';
+var_decl    : ID ':' data_type value_init ';'
+            | ID ':' variable;
 
 value_init  : ':=' value_literal
             | ':=' indexation

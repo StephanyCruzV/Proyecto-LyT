@@ -2,9 +2,9 @@
 
 function example1( ) is
 begin
-	mA : mat := [2 , 2] ;
-	mB : mat := [2 , 2] ;
-	mC : mat := [2 , 2] ;
+	mA : mat [2 , 2] ;
+	mB : mat [2 , 2] ;
+	mC : mat [2 , 2] ;
 
 	begin
 	for i in 0 .. 2 loop
