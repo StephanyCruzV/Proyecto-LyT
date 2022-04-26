@@ -1,3 +1,4 @@
+
 function factorial(n : int) return int is
     result : int := 1;
     result : float := 0.0;

@@ -15,6 +15,8 @@ NOT     : 'not';
 VAR     : 'var';
 INT     : 'int';
 FLOAT   : 'float';
+ARRAY   : 'array';
+MAT     : 'mat';
 BEGIN   : 'begin';
 END     : 'end';
 FOR     : 'for';
@@ -62,6 +64,7 @@ vars_decl   : var_decl vars_decl
 var_decl    : ID ':' data_type value_init ';';
 
 value_init  : ':=' value_literal
+            | ':=' indexation
             | ;
 
 funcs_decl  : func_decl funcs_decl
@@ -69,7 +72,7 @@ funcs_decl  : func_decl funcs_decl
 
 func_decl   : FUNCTION ID arguments return_type IS vars_decl block;
 
-arguments   : '(' args_list ')';
+arguments   : '(' args_list? ')';
 
 args_list   : arg_list arg_list_continuation ;
 
@@ -94,6 +97,7 @@ stmts       : stmt stmts
 stmt        : assignation
             | if_block
             | loop_block
+            | for_loop
             | EXIT ';'
             | RETURN expression ';'
             | built_in_func
@@ -144,10 +148,13 @@ dimensions_continuation : ',' CTE_INT dimensions_continuation
 //expression  :  EXPRESSION;
 
 data_type   : INT
-            | FLOAT;
+            | FLOAT
+            | ARRAY
+            | MAT;
 
 value_literal   : CTE_INT
-                | CTE_FLOAT ;
+                | CTE_FLOAT 
+                | indexation;
 
 // -------------------------------------
 // Expresion
@@ -186,7 +193,7 @@ prod_div	: prod_op prod_exp
 sum_res		: sum_op num_exp
 		| ;
 
-factor		: '(' num_exp ')'
+factor	: '(' num_exp ')'
 		| CTE_INT
 		| CTE_FLOAT
 		| variable 

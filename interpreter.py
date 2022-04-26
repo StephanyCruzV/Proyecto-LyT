@@ -36,6 +36,7 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#var_decl.
     def enterVar_decl(self, ctx:SCVParser.Var_declContext):
+        pass
         sym = ctx.ID().getText()
 
         if sym in self.symtable:
