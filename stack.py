@@ -26,3 +26,11 @@ class Stack:
             raise Exception('Trying to pop empty stack')
         else:
             return self.data.pop()
+    
+    def top(self):
+        if len(self.data) == 0:
+            raise Exception('Trying to check empty stack')
+        else:
+            return self.data[-1]
+
+

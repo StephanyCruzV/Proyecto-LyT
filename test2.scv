@@ -8,7 +8,7 @@ begin
         a := a + a ;
         b := c * a 
         if b > c then
-            result = a + 1;
+            result := a + 1;
         else
             result := a - 1;
         end if ;

@@ -1,14 +1,41 @@
+from socketserver import ForkingMixIn
 from antlr4 import *                #
 from SCVLexer import SCVLexer       #
 from SCVParser import SCVParser     #
 from SCVListener import *           #
 from stack import *                 #
 
-
 def report_error(ctx, msg):
     line = ctx.start.line
     column = ctx.start.column
     print(f'error {line}:{column} {msg}')
+
+#############################################################################################
+#                                 DICCIONARIO DE OPERACIONES
+#############################################################################################
+BIN = "bin"
+UNI = "uni"
+
+op_nary = {
+    "+"     : BIN,
+    "-"     : BIN,
+    "*"     : BIN,
+    "/"     : BIN,
+    "<"     : BIN,
+    ">"     : BIN,
+    "<="    : BIN,
+    ">="    : BIN,
+    "="     : BIN,
+    "and"   : BIN,
+    "or"    : BIN,
+    "not"   : UNI,
+    ":="    : BIN,
+    "print" : UNI
+}
+
+#############################################################################################
+#                                     CLASE INTERPRETADOR
+#############################################################################################
 
 # This class defines a complete listener for a parse tree produced by SCVParser.
 class Interpreter(SCVListener):
@@ -470,7 +497,38 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#factor.
     def enterFactor(self, ctx:SCVParser.FactorContext):
-        pass
+        fac = ctx.factor().getText()
+
+        if self.opstack.top() == '*':
+            if self.valstack.top().isidentifier() == True :
+                t1 = self.symtable[fac]['value']
+            else:
+                t1 = self.valstack.top()
+            self.valstack.pop()
+
+            if self.valstack.top().isidentifier() == True :
+                t2 = self.symtable[fac]['value']
+            else:
+                t2 = self.valstack.top()
+            self.valstack.pop()
+
+            self.valstack.append(t2 * t1)
+
+        elif self.opstack.top() == '/':
+            if self.valstack.top().isidentifier() == True :
+                t1 = self.symtable[fac]['value']
+            else:
+                t1 = self.valstack.top()
+            self.valstack.pop()
+
+            if self.valstack.top().isidentifier() == True :
+                t2 = self.symtable[fac]['value']
+            else:
+                t2 = self.valstack.top()
+            self.valstack.pop()
+
+            self.valstack.append(t2 / t1)
+
 
     # Exit a parse tree produced by SCVParser#factor.
     def exitFactor(self, ctx:SCVParser.FactorContext):
@@ -510,3 +568,83 @@ class Interpreter(SCVListener):
     # Exit a parse tree produced by SCVParser#rel_operator.
     def exitRel_operator(self, ctx:SCVParser.Rel_operatorContext):
         pass
+    
+
+    #############################################################################################
+    #                                      OPERACIONES
+    #############################################################################################
+
+    def eval_bin(self):
+        op = self.opstack.pop()
+        p = []
+
+        # Evaluar número de parametros necesarios para operación
+        if op_nary[op] == BIN:
+            p.append(self.valstack.pop())
+            p.append(self.valstack.pop())
+        elif op_nary[op] == UNI:
+            p.append(self.valstack.pop())
+        
+        if op != ':=' :
+            for i, _ in enumerate(p):
+                if p[i].isidentifier():
+                    p[i] = self.symtable[p[i]]['value']
+
+        # Realizar operaciones aritméticas
+        if op ==  '+':
+            self.valstack.append(p[1] + p[0])
+        elif op == '-':
+            self.valstack.append(p[1] - p[0])
+        elif op == '*':
+            self.valstack.append(p[1] * p[0])
+        elif op == '/':
+            self.valstack.append(p[1] / p[0])
+
+        # Realizar operaciones relacionales
+        elif op == '>':
+            if p[1] > p[0] :
+                self.valstack.append(1)
+            else :
+                self.valstack.append(0)
+        elif op == '<':
+            if p[1] < p[0] :
+                self.valstack.append(1)
+            else :
+                self.valstack.append(0)
+        elif op == '>=':
+            if p[1] >= p[0] :
+                self.valstack.append(1)
+            else :
+                self.valstack.append(0)
+        elif op == '<=':
+            if p[1] <= p[0] :
+                self.valstack.append(1)
+            else :
+                self.valstack.append(0)
+        elif op == '=':
+            if p[1] == p[0] :
+                self.valstack.append(1)
+            else :
+                self.valstack.append(0)
+
+        # Realizar operaciones lógicas
+        elif op == 'not':
+            if p[0] == 1 :
+                self.valstack.append(0)
+            else :
+                self.valstack.append(1)
+        elif op == 'and':
+            if p[1] == 1 and p[0] == 1 :
+                self.valstack.append(1)
+            else :
+                self.valstack.append(0)
+        elif op == 'or':
+            if p[1] == 1 or p[0] == 1 :
+                self.valstack.append(1)
+            else :
+                self.valstack.append(0)
+
+        # Realizar operaciones de asignación
+        elif op == ':=':
+            self.symtable[p[1]]['value'] = p[0]
+
