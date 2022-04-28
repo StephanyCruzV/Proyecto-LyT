@@ -1,31 +1,30 @@
 #| Programa prueba - Suma de matrices |#
 
 function example1( ) is
-begin
-	mA : mat [2 , 2] ;
-	mB : mat [2 , 2] ;
-	mC : mat [2 , 2] ;
+	mA : mat[2,2] ;
+	mB : mat[2,2] ;
+	mC : mat[2,2] ;
 
 	begin
-	for i in 0 .. 2 loop
-		for j in 0 .. 2 loop
-			mA[i , j] := Read ();
-		end loop;
-	end loop;
-
-	for i in 0 .. 2 loop
-		for j in 0 .. 2 loop
-			mB[i , j] := Read ();
-		end loop;
-	end loop;
-
-	for i in 0 .. 2 loop
-		for j in 0 .. 2 loop
-			for k in 0 .. 2 loop
-				mC[i , j] := mC[i, j] + mA[i, k]* mB[k, j]; 
+		for i in 0..2 loop
+			for j in 0..2 loop
+				mA[i,j] := read();
 			end loop;
 		end loop;
-	end loop;
+
+		for i in 0..2 loop
+			for j in 0..2 loop
+				mB[i,j] := read();
+			end loop;
+		end loop;
+
+		for i in 0..2 loop
+			for j in 0..2 loop
+				for k in 0..2 loop
+					mC[i,j] := mC[i,j] + mA[i,k] * mB[k,j]; 
+				end loop;
+			end loop;
+		end loop;
 
 	return mC;
 

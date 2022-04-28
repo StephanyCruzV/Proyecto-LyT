@@ -61,11 +61,12 @@ program     : vars_decl funcs_decl;
 vars_decl   : var_decl vars_decl
             | ;
 
-var_decl    : ID ':' data_type value_init ';'
-            | ID ':' variable;
+var_decl    : ID ':' data_type var_spc ';' ;
+
+var_spc     : value_init
+            | indexation ;
 
 value_init  : ':=' value_literal
-            | ':=' indexation
             | ;
 
 funcs_decl  : func_decl funcs_decl
@@ -136,14 +137,13 @@ params      : ID params_continuation
 params_continuation : ',' ID
             | ;
 
-variable    : ID indexation ;
+variable    : ID indexation? ;
 
-indexation  : '[' dimensions ']'
-            | ;
+indexation  : '[' dimensions ']';
 
-dimensions  : CTE_INT dimensions_continuation ;
+dimensions  : factor dimensions_continuation ;
 
-dimensions_continuation : ',' CTE_INT dimensions_continuation
+dimensions_continuation : ',' factor dimensions_continuation
             | ;
 
 //expression  :  EXPRESSION;
@@ -154,8 +154,7 @@ data_type   : INT
             | MAT;
 
 value_literal   : CTE_INT
-                | CTE_FLOAT 
-                | indexation;
+                | CTE_FLOAT;
 
 // -------------------------------------
 // Expresion

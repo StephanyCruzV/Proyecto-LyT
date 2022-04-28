@@ -13,8 +13,8 @@ PARSER_FILES=\
 
 all: $(PARSER_FILES)
 	#python3 main.py test.scv
-	#python3 main.py test2.scv
-	python3 main.py example1.scv
+	python3 main.py test2.scv
+	#python3 main.py example1.scv
 
 $(PARSER_FILES): SCV.g4
 	java -jar $(ANTLR) SCV.g4 -Dlanguage=Python3

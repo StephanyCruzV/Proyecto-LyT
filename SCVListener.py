@@ -35,6 +35,15 @@ class SCVListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by SCVParser#var_spc.
+    def enterVar_spc(self, ctx:SCVParser.Var_spcContext):
+        pass
+
+    # Exit a parse tree produced by SCVParser#var_spc.
+    def exitVar_spc(self, ctx:SCVParser.Var_spcContext):
+        pass
+
+
     # Enter a parse tree produced by SCVParser#value_init.
     def enterValue_init(self, ctx:SCVParser.Value_initContext):
         pass

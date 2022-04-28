@@ -1,9 +1,9 @@
+from antlr4 import *                #
+from SCVLexer import SCVLexer       #
+from SCVParser import SCVParser     #
+from SCVListener import *           #
+from stack import *                 #
 
-from symtable import symtable
-from antlr4 import *
-from SCVLexer import SCVLexer
-from SCVParser import SCVParser
-from SCVListener import *
 
 def report_error(ctx, msg):
     line = ctx.start.line
@@ -15,6 +15,9 @@ class Interpreter(SCVListener):
     symtable = dict()
     symlocal = set()
     in_function = False
+
+    opstack = Stack()
+    valstack=Stack()
 
     # Enter a parse tree produced by SCVParser#program.
     def enterProgram(self, ctx:SCVParser.ProgramContext):
@@ -44,20 +47,24 @@ class Interpreter(SCVListener):
             exit()
 
         symtype = ctx.data_type().getText()
-        symvalue = ctx.value_init().value_literal().getText()
 
         self.symtable[sym] = dict()
         self.symtable[sym]['type'] = symtype
-        
-        if symtype == 'int':
-            self.symtable[sym]['value'] = int(symvalue)
+
+        if symtype == 'mat':
+            pass
         else:
-            self.symtable[sym]['value'] = float(symvalue)
+            symvalue = ctx.var_spc().value_init().value_literal().getText()
+            
+            if symtype == 'int':
+                self.symtable[sym]['value'] = int(symvalue)
+            else:
+                self.symtable[sym]['value'] = float(symvalue)
 
-        if self.in_function:
-            self.symlocal.add(sym)
+            if self.in_function:
+                self.symlocal.add(sym)
 
-        print(self.symtable)
+            print(self.symtable)
 
     # Exit a parse tree produced by SCVParser#var_decl.
     def exitVar_decl(self, ctx:SCVParser.Var_declContext):
@@ -420,16 +427,23 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#num_exp.
     def enterNum_exp(self, ctx:SCVParser.Num_expContext):
-        pass
+        self.opstack.data.append( '(' )
 
     # Exit a parse tree produced by SCVParser#num_exp.
     def exitNum_exp(self, ctx:SCVParser.Num_expContext):
-        pass
+        self.opstack.data.append( ')' )
+        print(self.opstack)
 
 
     # Enter a parse tree produced by SCVParser#prod_exp.
     def enterProd_exp(self, ctx:SCVParser.Prod_expContext):
-        pass
+        fac = ctx.factor().getText()
+        if ctx.factor().CTE_INT != None :
+            self.valstack.data.append(fac)
+        else:
+            if ctx.factor().__annotations__CTE_FLOAT != None :
+                self.valstack.data.append(fac)
+        print(self.valstack)
 
     # Exit a parse tree produced by SCVParser#prod_exp.
     def exitProd_exp(self, ctx:SCVParser.Prod_expContext):
@@ -465,7 +479,11 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#prod_op.
     def enterProd_op(self, ctx:SCVParser.Prod_opContext):
-        pass
+        operator = ctx.getText()
+        if operator == '*' :
+            self.opstack.data.append( '*' )
+        else:
+            self.opstack.data.append( '/' )
 
     # Exit a parse tree produced by SCVParser#prod_op.
     def exitProd_op(self, ctx:SCVParser.Prod_opContext):
@@ -474,7 +492,11 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#sum_op.
     def enterSum_op(self, ctx:SCVParser.Sum_opContext):
-        pass
+        operator = ctx.getText()
+        if operator == '+' :
+            self.opstack.data.append( '+' )
+        else:
+            self.opstack.data.append( '-' )
 
     # Exit a parse tree produced by SCVParser#sum_op.
     def exitSum_op(self, ctx:SCVParser.Sum_opContext):
