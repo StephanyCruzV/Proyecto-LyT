@@ -1,8 +1,8 @@
-import sys
-from antlr4 import *
-from SCVLexer import SCVLexer
-from SCVParser import SCVParser
-from interpreter import *
+import sys                      #
+from antlr4 import *            #
+from SCVLexer import SCVLexer   #
+from SCVParser import SCVParser #
+from interpreter import *       #
  
 def main(argv):
     input_stream = FileStream(argv[1])
