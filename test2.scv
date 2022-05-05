@@ -1,5 +1,5 @@
 
-function test_operations ( ) is
+#| function test_operations ( ) is
     a : int := 1;
     b : float := 0.0;
     c : int := 5;
@@ -15,3 +15,16 @@ begin
 
         return result;
 end test_operations;
+|#
+
+function test_operations ( ) is
+    a : int := 1;
+    b : float := 0;
+    c : int := 5;
+begin
+    a := a + a ;
+    b := c * a;
+
+    return b;
+end test_operations;
+
