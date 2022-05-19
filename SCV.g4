@@ -160,25 +160,25 @@ value_literal   : CTE_INT
 // Expresion
 
 expression	: rel_exp
-		| num_exp 
-		| bool_exp;
+		    | num_exp 
+		    | bool_exp;
 
 bool_exp 	: and_exp next_bool ;
 
 next_bool 	: OR bool_exp 
-		| ;
+		    | ;
 
 and_exp 	: not_exp next_and ;
 
 next_and 	: AND and_exp
-		| ;
+		    | ;
 
 not_exp 	: NOT bool_term
-		| bool_term;
+		    | bool_term;
 
 bool_term	: rel_exp
-		| variable
-		| '(' bool_exp ')' ;
+		    | variable
+		    | '(' bool_exp ')' ;
 
 
 rel_exp		: num_exp rel_operator num_exp ;
@@ -188,10 +188,10 @@ num_exp		: prod_exp sum_res ;
 prod_exp	: factor prod_div ;
 
 prod_div	: prod_op prod_exp
-		| ;
+		    | ;
 
 sum_res		: sum_op num_exp
-		| ;
+		    | ;
 
 factor	: '(' num_exp ')'
 		| CTE_INT

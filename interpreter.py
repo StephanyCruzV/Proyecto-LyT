@@ -46,6 +46,8 @@ def eval_bin(self):
         p.append(self.valstack.pop())
     elif op_nary[op] == UNI:
         p.append(self.valstack.pop())
+    else :
+        pass
     
     if op != ':=' :
         for i, _ in enumerate(p):
@@ -297,12 +299,16 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#assignation.
     def enterAssignation(self, ctx:SCVParser.AssignationContext):
-        pass
+        sym = ctx.variable().getText()
+        self.opstack.append( ':=' )
+
 
     # Exit a parse tree produced by SCVParser#assignation.
     def exitAssignation(self, ctx:SCVParser.AssignationContext):
-        pass
+        sym = ctx.variable().getText()
 
+        self.symtable[sym]['value'] = self.valstack.pop()
+        print(self.symtable[sym]['value'])
 
     # Enter a parse tree produced by SCVParser#if_block.
     def enterIf_block(self, ctx:SCVParser.If_blockContext):
@@ -463,12 +469,13 @@ class Interpreter(SCVListener):
 
     # Exit a parse tree produced by SCVParser#expression.
     def exitExpression(self, ctx:SCVParser.ExpressionContext):
-        pass
+        print(self.opstack)
+        print(self.valstack)
 
 
     # Enter a parse tree produced by SCVParser#bool_exp.
     def enterBool_exp(self, ctx:SCVParser.Bool_expContext):
-        eval_bin(self)
+        pass
 
     # Exit a parse tree produced by SCVParser#bool_exp.
     def exitBool_exp(self, ctx:SCVParser.Bool_expContext):
@@ -522,31 +529,33 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#rel_exp.
     def enterRel_exp(self, ctx:SCVParser.Rel_expContext):
-        eval_bin(self)
+        pass
 
     # Exit a parse tree produced by SCVParser#rel_exp.
     def exitRel_exp(self, ctx:SCVParser.Rel_expContext):
-        pass
+        eval_bin(self)
 
 
     # Enter a parse tree produced by SCVParser#num_exp.
     def enterNum_exp(self, ctx:SCVParser.Num_expContext):
-        self.opstack.data.append( '(' )
-        eval_bin(self)
+        self.opstack.append( '(' )
+        if not self.opstack.empty():
+            eval_bin(self)
 
     # Exit a parse tree produced by SCVParser#num_exp.
     def exitNum_exp(self, ctx:SCVParser.Num_expContext):
-        self.opstack.data.append( ')' )
-        print(self.opstack)
-
+        self.opstack.append( ')' )
 
     # Enter a parse tree produced by SCVParser#prod_exp.
     def enterProd_exp(self, ctx:SCVParser.Prod_expContext):
-        pass
+        if not self.opstack.empty() :
+            eval_bin(self)
 
     # Exit a parse tree produced by SCVParser#prod_exp.
     def exitProd_exp(self, ctx:SCVParser.Prod_expContext):
-        pass
+        operator = self.opstack.top()
+        if not self.opstack.empty() and (operator == '+' or  operator == '-'):
+            eval_bin(self)
 
 
     # Enter a parse tree produced by SCVParser#prod_div.
@@ -566,24 +575,33 @@ class Interpreter(SCVListener):
     def exitSum_res(self, ctx:SCVParser.Sum_resContext):
         pass
 
-
     # Enter a parse tree produced by SCVParser#factor.
     def enterFactor(self, ctx:SCVParser.FactorContext):
-        pass
-
+        if ctx.getText().isdigit() :
+            self.valstack.append(ctx.getText())
+        elif ctx.getText():
+            # print(ctx.getText())
+            # print(self.symtable[ctx.getText()])
+            self.valstack.append(self.symtable[ctx.getText()]['value'])
+        
 
     # Exit a parse tree produced by SCVParser#factor.
     def exitFactor(self, ctx:SCVParser.FactorContext):
-        pass
+        operator = self.opstack.top()
+        if not self.opstack.empty() and (operator == '*' or  operator == '/'):
+            eval_bin(self)
+        #operator = self.opstack.top()
+        #if operator == '*' :
+            #self.opstack.append( '*' )
+        #else:
+            #self.opstack.append( '/' )
 
 
     # Enter a parse tree produced by SCVParser#prod_op.
     def enterProd_op(self, ctx:SCVParser.Prod_opContext):
-        operator = ctx.getText()
-        if operator == '*' :
-            self.opstack.data.append( '*' )
-        else:
-            self.opstack.data.append( '/' )
+        #operator = ctx.getText()
+        #if operator == '*' or  operator == '/':
+        pass
 
     # Exit a parse tree produced by SCVParser#prod_op.
     def exitProd_op(self, ctx:SCVParser.Prod_opContext):
@@ -594,9 +612,9 @@ class Interpreter(SCVListener):
     def enterSum_op(self, ctx:SCVParser.Sum_opContext):
         operator = ctx.getText()
         if operator == '+' :
-            self.opstack.data.append( '+' )
+            self.opstack.append( '+' )
         else:
-            self.opstack.data.append( '-' )
+            self.opstack.append( '-' )
 
     # Exit a parse tree produced by SCVParser#sum_op.
     def exitSum_op(self, ctx:SCVParser.Sum_opContext):
