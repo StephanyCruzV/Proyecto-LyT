@@ -50,7 +50,7 @@ def eval_bin(self):
     else :
         pass
     
-    print('====>', op, p)
+    #print('====>', op, p)
 
     if op != ':=' :
         for i, _ in enumerate(p):
@@ -124,6 +124,10 @@ def eval_bin(self):
     # Realizar operaciones de asignación
     elif op == ':=':
         self.symtable[p[1]]['value'] = p[0]
+
+    # Realizar operaciones Built_In
+    #elif op == 'print':
+        #self.valstack.append(0)
 
 
 #############################################################################################
@@ -316,11 +320,15 @@ class Interpreter(SCVListener):
         self.valstack.append(sym)
         self.opstack.append( ':=' )
 
+        print('OpStack',self.opstack)
+        print('ValStack',self.valstack)
+
     # Exit a parse tree produced by SCVParser#assignation.
     def exitAssignation(self, ctx:SCVParser.AssignationContext):
         sym = ctx.variable().getText()
 
-        #self.symtable[sym]['value'] = self.valstack.pop()
+        if not self.valstack.empty():
+            self.valstack.pop()
         #print(self.symtable[sym]['value'])
 
         pprint(self.symtable)
@@ -394,7 +402,8 @@ class Interpreter(SCVListener):
 
     # Exit a parse tree produced by SCVParser#built_in_func.
     def exitBuilt_in_func(self, ctx:SCVParser.Built_in_funcContext):
-        pass
+        sym = ctx.id_list().ID().getText()
+        print(sym, ':=', self.symtable[sym]['value'])
 
 
     # Enter a parse tree produced by SCVParser#func_call.
@@ -487,9 +496,8 @@ class Interpreter(SCVListener):
         if not self.opstack.empty():
             eval_bin(self)
 
-        print(self.opstack)
-        print(self.valstack)
-
+        print('OpStack',self.opstack)
+        print('ValStack',self.valstack)
 
 
     # Enter a parse tree produced by SCVParser#bool_exp.
@@ -577,8 +585,8 @@ class Interpreter(SCVListener):
             operator = self.opstack.top()
             if not self.opstack.empty() and (operator == '+' or  operator == '-'):
                 eval_bin(self)
-            print(self.opstack)
-            print(self.valstack)
+            print('OpStack',self.opstack)
+            print('ValStack',self.valstack)
         
 
     # Enter a parse tree produced by SCVParser#prod_div.
@@ -605,9 +613,11 @@ class Interpreter(SCVListener):
             self.valstack.append(int(ctx.getText()))
         elif ctx.CTE_FLOAT() :
             self.valstack.append(float(ctx.getText()))
+        elif ctx.num_exp():
+            self.opstack.append('(')
         elif ctx.getText():
-            print(ctx.getText())
-            print(self.symtable[ctx.getText()])
+            #print(ctx.getText())
+            #print(self.symtable[ctx.getText()])
             self.valstack.append(self.symtable[ctx.getText()]['value'])
         
         
@@ -618,8 +628,12 @@ class Interpreter(SCVListener):
 
             if operator == '*' or  operator == '/':
                 eval_bin(self)
-        print(self.opstack)
-        print(self.valstack)
+
+        if ctx.num_exp():
+            self.opstack.append(')')
+
+        print('OpStack',self.opstack)
+        print('ValStack',self.valstack)
 
     # Enter a parse tree produced by SCVParser#prod_op.
     def enterProd_op(self, ctx:SCVParser.Prod_opContext):
