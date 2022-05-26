@@ -6,6 +6,7 @@ function test_operations ( ) is
 begin
     a := a - b + c ;
     b := (a + c * c) / 2.0;
+    c := 1 * (2 + 3) + 4;
 
-    return b;
+    print b;
 end test_operations;
