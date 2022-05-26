@@ -1,28 +1,11 @@
 
 function test_operations ( ) is
-    a : int := 1;
-    b : float := 0;
-    c : int := 5;
+    a : int := 7;
+    b : float := 4;
+    c : int := 2;
 begin
-    a := a + a ;
-    b := c * a;
+    a := a - b + c ;
+    b := (a + c * c) / 2.0;
 
     return b;
 end test_operations;
-
-#| function test_operations ( ) is
-    a : int := 1;
-    b : float := 0.0;
-    c : int := 5;
-    result : float := 0;
-begin
-        a := a + a ;
-        b := c * a 
-        if b > c then
-            result := a + 1;
-        else
-            result := a - 1;
-        end if ;
-
-        return result;
-end test_operations; |#
