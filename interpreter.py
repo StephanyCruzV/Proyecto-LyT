@@ -10,6 +10,13 @@ def report_error(ctx, msg):
     column = ctx.start.column
     print(f'error {line}:{column} {msg}')
 
+t_count = 0     # Contador para generar cuadrúplos
+c_list = []     # Lista para almacenar cuadrúplos
+temp_list = []  # Lista para almacenar temporales
+
+
+# cuadruplo = []  # Elementos de cuadrúplo
+
 #############################################################################################
 #                                 DICCIONARIO DE OPERACIONES
 #############################################################################################
@@ -40,13 +47,28 @@ op_nary = {
 def eval_bin(self):
     op = self.opstack.pop()
     p = []
+    c = []
+
+    c.append(op)
 
     # Evaluar número de parametros necesarios para operación
     if op_nary[op] == BIN:
-        p.append(self.valstack.pop())
-        p.append(self.valstack.pop())
+        val0 = self.valstack.pop()
+        val1 = self.valstack.pop()
+
+        c.append(val0)
+        c.append(val1)
+
+
+        p.append(val0)
+        p.append(val1)
+
     elif op_nary[op] == UNI:
-        p.append(self.valstack.pop())
+        val0 = self.valstack.pop()
+        c.append(val0)
+        c.append('')
+        p.append(val0)
+
     else :
         pass
     
@@ -68,62 +90,92 @@ def eval_bin(self):
 
     
     # Realizar operaciones aritméticas
+    global t_count
+    temp = '_t' + str(t_count)
+    t_count += 1 
+    self.valstack.append(temp)
+    self.symtable[temp] = dict()
+
+    c.append(temp)
+
     if op ==  '+':
-        self.valstack.append(p[1] + p[0])
+        self.symtable[temp]['value'] = p[1] + p[0]
+        #self.valstack.append(p[1] + p[0])
     elif op == '-':
-        self.valstack.append(p[1] - p[0])
+        self.symtable[temp]['value'] = p[1] - p[0]
+        #self.valstack.append(p[1] - p[0])
     elif op == '*':
-        self.valstack.append(p[1] * p[0])
+        self.symtable[temp]['value'] = p[1] * p[0]
+        #self.valstack.append(p[1] * p[0])
     elif op == '/':
-        self.valstack.append(p[1] / p[0])
+        self.symtable[temp]['value'] = p[1] / p[0]
+        #self.valstack.append(p[1] / p[0])
 
     # Realizar operaciones relacionales
     elif op == '>':
         if p[1] > p[0] :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
         else :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
     elif op == '<':
         if p[1] < p[0] :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
         else :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
     elif op == '>=':
         if p[1] >= p[0] :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
         else :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
     elif op == '<=':
         if p[1] <= p[0] :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
         else :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
     elif op == '=':
         if p[1] == p[0] :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
         else :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
 
     # Realizar operaciones lógicas
     elif op == 'not':
         if p[0] == 1 :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
         else :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
     elif op == 'and':
         if p[1] == 1 and p[0] == 1 :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
         else :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
     elif op == 'or':
         if p[1] == 1 or p[0] == 1 :
-            self.valstack.append(1)
+            self.symtable[temp]['value'] = 1
+            #self.valstack.append(1)
         else :
-            self.valstack.append(0)
+            self.symtable[temp]['value'] = 0
+            #self.valstack.append(0)
 
     # Realizar operaciones de asignación
     elif op == ':=':
-        self.symtable[p[1]]['value'] = p[0]
+        self.symtable[p[1]]['value'] = self.symtable[p[0]]['value']
+
+    self.ir_code.append(c)
 
     # Realizar operaciones Built_In
     #elif op == 'print':
@@ -143,13 +195,15 @@ class Interpreter(SCVListener):
     opstack = Stack()
     valstack=Stack()
 
+    ir_code = []
+
     # Enter a parse tree produced by SCVParser#program.
     def enterProgram(self, ctx:SCVParser.ProgramContext):
         pass
 
     # Exit a parse tree produced by SCVParser#program.
     def exitProgram(self, ctx:SCVParser.ProgramContext):
-        pass
+        pprint(self.ir_code)
 
 
     # Enter a parse tree produced by SCVParser#vars_decl.

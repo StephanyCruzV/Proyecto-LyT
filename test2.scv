@@ -8,5 +8,7 @@ begin
     b := (a + c * c) / 2.0;
     c := 1 * (2 + 3) + 4;
 
-    print b;
+    print a;
+    print b:
+    print c;
 end test_operations;
