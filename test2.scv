@@ -4,11 +4,13 @@ function test_operations ( ) is
     b : float := 4;
     c : int := 2;
 begin
-    a := a - b + c ;
-    b := (a + c * c) / 2.0;
-    c := 1 * (2 + 3) + 4;
+
+    a := 1;
+    if a * 2 = 0 then
+        a := 0; 
+    else
+        a := 2;
+    end if;
 
     print a;
-    print b:
-    print c;
 end test_operations;

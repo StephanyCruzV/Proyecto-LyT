@@ -179,6 +179,15 @@ class SCVListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by SCVParser#if_trigger.
+    def enterIf_trigger(self, ctx:SCVParser.If_triggerContext):
+        pass
+
+    # Exit a parse tree produced by SCVParser#if_trigger.
+    def exitIf_trigger(self, ctx:SCVParser.If_triggerContext):
+        pass
+
+
     # Enter a parse tree produced by SCVParser#alter.
     def enterAlter(self, ctx:SCVParser.AlterContext):
         pass

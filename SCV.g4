@@ -107,9 +107,11 @@ stmt        : assignation
 
 assignation : variable ':=' expression ';';
 
-if_block    : IF expression THEN stmts alter END IF ';';
+if_block    : IF expression THEN if_trigger stmts alter END IF ';';
 
-alter       : ELSE else_block
+if_trigger  : ;
+
+alter       : ELSE  else_block
             | ;
 
 else_block  : if_block
