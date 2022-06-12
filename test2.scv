@@ -6,7 +6,7 @@ function test_operations ( ) is
 begin
 
     a := 1;
-    if a * 2 = 0 then
+    if a * 2 = 2 then
         a := 0; 
     else
         a := 2;

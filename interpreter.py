@@ -53,8 +53,13 @@ def eval_bin(self):
         val0 = self.valstack.pop()
         val1 = self.valstack.pop()
 
-        c.append(val0)
-        c.append(val1)
+        if op == ':=':
+            c.append(val0)
+            c.append(' ')
+            c.append(val1)
+        else:
+            c.append(val0)
+            c.append(val1)
 
 
         p.append(val0)
@@ -62,8 +67,8 @@ def eval_bin(self):
 
     elif op_nary[op] == UNI:
         val0 = self.valstack.pop()
+        c.append(' ')
         c.append(val0)
-        c.append('')
         p.append(val0)
 
     else :
@@ -79,6 +84,7 @@ def eval_bin(self):
                 continue
             elif p[i].isidentifier():
                 if p[i] in self.symtable:
+                    #p[i] = self.symtable[p[i]]
                     p[i] = self.symtable[p[i]]['value']
                 else:
                     raise Exception(f'variable {p[i]} not declared')
@@ -89,11 +95,13 @@ def eval_bin(self):
     # Realizar operaciones aritméticas
     global t_count
     temp = '_t' + str(t_count)
-    t_count += 1 
-    self.valstack.append(temp)
-    self.symtable[temp] = dict()
 
-    c.append(temp)
+    if op != ':=':
+        t_count += 1 
+        self.valstack.append(temp)
+        self.symtable[temp] = dict()
+
+        c.append(temp)
 
     if op ==  '+':
         self.symtable[temp]['value'] = p[1] + p[0]
@@ -433,7 +441,7 @@ class Interpreter(SCVListener):
     # Exit a parse tree produced by SCVParser#else_block.
     def exitElse_block(self, ctx:SCVParser.Else_blockContext):
         i = self.jumps.pop()    
-        next_jump = len(self.ir_code) + 1
+        next_jump = len(self.ir_code) 
         self.ir_code[i].append(next_jump)
 
 
