@@ -1,0 +1,10 @@
+function test_operations ( ) is
+    a : int := 1;
+begin
+    
+    for i in 0 .. 10 loop
+        a = a + 1;
+    end loop;
+
+    print a;
+end test_operations;

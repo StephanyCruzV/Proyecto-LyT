@@ -103,7 +103,8 @@ stmt        : assignation
             | EXIT ';'
             | RETURN expression ';'
             | built_in_func
-            | func_call ;
+            | func_call 
+            | expression ;
 
 assignation : variable ':=' expression ';';
 
@@ -120,12 +121,11 @@ else_block  : if_block
 loop_block  : while_block
             | for_loop ;
 
-while_block : WHILE expression LOOP stmts END LOOP ';' ;
+while_block : WHILE expression LOOP while_trigger stmts END LOOP ';' ;
 
-for_loop    : FOR ID IN direction factor '..' factor LOOP stmts END LOOP ';' ;
+while_trigger : ;
 
-direction   : REVERSE
-            | ;
+for_loop    : FOR ID IN REVERSE factor '..' factor LOOP stmts END LOOP ';' ;
 
 built_in_func : PRINT '(' id_list ')' ';'
             | variable ':=' READ '()' ';' ;

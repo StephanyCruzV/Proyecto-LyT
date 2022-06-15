@@ -224,21 +224,21 @@ class SCVListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by SCVParser#while_trigger.
+    def enterWhile_trigger(self, ctx:SCVParser.While_triggerContext):
+        pass
+
+    # Exit a parse tree produced by SCVParser#while_trigger.
+    def exitWhile_trigger(self, ctx:SCVParser.While_triggerContext):
+        pass
+
+
     # Enter a parse tree produced by SCVParser#for_loop.
     def enterFor_loop(self, ctx:SCVParser.For_loopContext):
         pass
 
     # Exit a parse tree produced by SCVParser#for_loop.
     def exitFor_loop(self, ctx:SCVParser.For_loopContext):
-        pass
-
-
-    # Enter a parse tree produced by SCVParser#direction.
-    def enterDirection(self, ctx:SCVParser.DirectionContext):
-        pass
-
-    # Exit a parse tree produced by SCVParser#direction.
-    def exitDirection(self, ctx:SCVParser.DirectionContext):
         pass
 
 

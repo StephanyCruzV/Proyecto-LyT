@@ -12,6 +12,10 @@ def report_error(ctx, msg):
 
 t_count = 0     # Contador para generar cuadrúplos
 
+line_return = 0 # Registrar linea a regresar en saltos
+
+for_flag = 0    # Bandera para validar for, (declara i en diccionario)
+
 # cuadruplo = []  # Elementos de cuadrúplo
 
 #############################################################################################
@@ -205,6 +209,8 @@ def eval_bin(self):
 class Interpreter(SCVListener):
     symtable = dict()
     symlocal = set()
+    ctrl_var = set()
+
     in_function = False
 
     opstack = Stack()   # Stack para operadores
@@ -290,6 +296,9 @@ class Interpreter(SCVListener):
     def exitFunc_decl(self, ctx:SCVParser.Func_declContext):
         for sym in self.symlocal:
             del self.symtable[sym]
+
+        for sym in self.ctrl_var:
+            del self.ctrl_var[sym]
 
         self.in_function = False
 
@@ -456,29 +465,38 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#while_block.
     def enterWhile_block(self, ctx:SCVParser.While_blockContext):
-        pass
+        self.jumps.append(len(self.ir_code))
 
     # Exit a parse tree produced by SCVParser#while_block.
     def exitWhile_block(self, ctx:SCVParser.While_blockContext):
-        pass
+        cuad_jump = ['goto', ' ', ' ']
+        self.ir_code.append(cuad_jump)
 
+        i = self.jumps.pop()    
+        next_jump = len(self.ir_code)
+        self.ir_code[i].append(next_jump)
+        
+        i = self.jumps.pop()
+        self.ir_code[-1].append(i)
+
+    # Enter a parse tree produced by SCVParser#while_trigger.
+    def enterWhile_trigger(self, ctx:SCVParser.While_triggerContext):
+        cuad_jump = ['gotof', self.valstack.pop(), ' ']
+        self.jumps.append(len(self.ir_code))
+        self.ir_code.append(cuad_jump)
+
+    # Exit a parse tree produced by SCVParser#while_trigger.
+    def exitWhile_trigger(self, ctx:SCVParser.While_triggerContext):
+        pass
 
     # Enter a parse tree produced by SCVParser#for_loop.
     def enterFor_loop(self, ctx:SCVParser.For_loopContext):
-        pass
+        for_flag = 1
+        self.ctrl_var.add('i')
 
     # Exit a parse tree produced by SCVParser#for_loop.
     def exitFor_loop(self, ctx:SCVParser.For_loopContext):
-        pass
-
-
-    # Enter a parse tree produced by SCVParser#direction.
-    def enterDirection(self, ctx:SCVParser.DirectionContext):
-        pass
-
-    # Exit a parse tree produced by SCVParser#direction.
-    def exitDirection(self, ctx:SCVParser.DirectionContext):
-        pass
+        for_flag = 0
 
 
     # Enter a parse tree produced by SCVParser#built_in_func.
@@ -695,16 +713,19 @@ class Interpreter(SCVListener):
     # Enter a parse tree produced by SCVParser#factor.
     def enterFactor(self, ctx:SCVParser.FactorContext):
         #self.valstack.append(ctx.getText())
-        if ctx.CTE_INT() :
-            self.valstack.append(int(ctx.getText()))
-        elif ctx.CTE_FLOAT() :
-            self.valstack.append(float(ctx.getText()))
-        elif ctx.num_exp():
-            self.opstack.append('(')
-        elif ctx.getText():
-            #print(ctx.getText())
-            #print(self.symtable[ctx.getText()])
-            self.valstack.append(self.symtable[ctx.getText()]['value'])
+        if for_flag == 0 :
+            if ctx.CTE_INT() :
+                self.valstack.append(int(ctx.getText()))
+            elif ctx.CTE_FLOAT() :
+                self.valstack.append(float(ctx.getText()))
+            elif ctx.num_exp():
+                self.opstack.append('(')
+            elif ctx.getText():
+                #print(ctx.getText())
+                #print(self.symtable[ctx.getText()])
+                self.valstack.append(self.symtable[ctx.getText()]['value'])
+        else:
+            self.valstack.append(self.symtable['i']['value'])
         
         
     # Exit a parse tree produced by SCVParser#factor.
