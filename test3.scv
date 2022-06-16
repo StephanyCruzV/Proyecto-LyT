@@ -1,10 +1,11 @@
 
 function test_operations ( ) is
-    a : int := 0;
+    a : int := 1;
 begin
     
     for i in 0 .. 9 loop
-        a := a + 1;
+        a := a * 2;
+        
     end loop;
 
     print a;
