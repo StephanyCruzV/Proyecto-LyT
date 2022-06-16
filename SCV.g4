@@ -125,7 +125,13 @@ while_block : WHILE expression LOOP while_trigger stmts END LOOP ';' ;
 
 while_trigger : ;
 
-for_loop    : FOR ID IN REVERSE factor '..' factor LOOP stmts END LOOP ';' ;
+for_loop    : FOR ID IN REVERSE? for_inferior '..' for_superior loop_trigger1 LOOP stmts END LOOP ';' ;
+
+for_inferior    : factor ;
+
+for_superior    : factor ;
+
+loop_trigger1: ;
 
 built_in_func : PRINT '(' id_list ')' ';'
             | variable ':=' READ '()' ';' ;

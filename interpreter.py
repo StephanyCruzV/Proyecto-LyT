@@ -1,3 +1,4 @@
+from select import select
 from antlr4 import *                #
 from SCVLexer import SCVLexer       #
 from SCVParser import SCVParser     #
@@ -14,7 +15,7 @@ t_count = 0     # Contador para generar cuadrúplos
 
 line_return = 0 # Registrar linea a regresar en saltos
 
-for_flag = 0    # Bandera para validar for, (declara i en diccionario)
+
 
 # cuadruplo = []  # Elementos de cuadrúplo
 
@@ -45,7 +46,7 @@ op_nary = {
 #                                      OPERACIONES
 #############################################################################################
 
-def eval_bin(self):
+def gen_quad(self):
     op = self.opstack.pop()
     p = []
     c = []
@@ -88,8 +89,9 @@ def eval_bin(self):
                 continue
             elif p[i].isidentifier():
                 if p[i] in self.symtable:
-                    #p[i] = self.symtable[p[i]]
-                    p[i] = self.symtable[p[i]]['value']
+                    continue
+                elif p[i][0] == '_':
+                    continue
                 else:
                     raise Exception(f'variable {p[i]} not declared')
             else:
@@ -107,94 +109,8 @@ def eval_bin(self):
 
         c.append(temp)
 
-    if op ==  '+':
-        self.symtable[temp]['value'] = p[1] + p[0]
-        #self.valstack.append(p[1] + p[0])
-    elif op == '-':
-        self.symtable[temp]['value'] = p[1] - p[0]
-        #self.valstack.append(p[1] - p[0])
-    elif op == '*':
-        self.symtable[temp]['value'] = p[1] * p[0]
-        #self.valstack.append(p[1] * p[0])
-    elif op == '/':
-        self.symtable[temp]['value'] = p[1] / p[0]
-        #self.valstack.append(p[1] / p[0])
-
-    # Realizar operaciones relacionales
-    elif op == '>':
-        if p[1] > p[0] :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-        else :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-    elif op == '<':
-        if p[1] < p[0] :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-        else :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-    elif op == '>=':
-        if p[1] >= p[0] :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-        else :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-    elif op == '<=':
-        if p[1] <= p[0] :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-        else :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-    elif op == '=':
-        if p[1] == p[0] :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-        else :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-
-    # Realizar operaciones lógicas
-    elif op == 'not':
-        if p[0] == 1 :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-        else :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-    elif op == 'and':
-        if p[1] == 1 and p[0] == 1 :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-        else :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-    elif op == 'or':
-        if p[1] == 1 or p[0] == 1 :
-            self.symtable[temp]['value'] = 1
-            #self.valstack.append(1)
-        else :
-            self.symtable[temp]['value'] = 0
-            #self.valstack.append(0)
-
-    # Realizar operaciones de asignación
-    elif op == ':=':
-        if isinstance(p[0], int):
-            self.symtable[p[1]]['value'] = p[0]
-        elif isinstance(p[0], float):
-            self.symtable[p[1]]['value'] = p[0]
-        elif p[0].isidentifier():
-            if p[0] in self.symtable:
-                self.symtable[p[1]]['value'] = self.symtable[p[0]]['value']
-            else:
-                raise Exception(f'variable {p[i]} not declared')
-        else:
-            raise Exception('unidentified', p[i])
-
     self.ir_code.append(c)
+    print(c)
 
     # Realizar operaciones Built_In
     #elif op == 'print':
@@ -220,13 +136,17 @@ class Interpreter(SCVListener):
 
     jumps = Stack()     # Stack para saltos
 
+    reading_ctrl_var = False
+
+    for_direction = 1
+
     # Enter a parse tree produced by SCVParser#program.
     def enterProgram(self, ctx:SCVParser.ProgramContext):
         pass
 
     # Exit a parse tree produced by SCVParser#program.
     def exitProgram(self, ctx:SCVParser.ProgramContext):
-        pprint(self.ir_code)
+        pass
 
 
     # Enter a parse tree produced by SCVParser#vars_decl.
@@ -257,9 +177,14 @@ class Interpreter(SCVListener):
             symvalue = ctx.var_spc().value_init().value_literal().getText()
             
             if symtype == 'int':
-                self.symtable[sym]['value'] = int(symvalue)
+                symvalue = int(symvalue)
             else:
-                self.symtable[sym]['value'] = float(symvalue)
+                symvalue = float(symvalue)
+
+            self.opstack.append(':=')
+            self.valstack.append(sym)
+            self.valstack.append(symvalue)
+            gen_quad(self)
 
             if self.in_function:
                 self.symlocal.add(sym)
@@ -296,9 +221,6 @@ class Interpreter(SCVListener):
     def exitFunc_decl(self, ctx:SCVParser.Func_declContext):
         for sym in self.symlocal:
             del self.symtable[sym]
-
-        for sym in self.ctrl_var:
-            del self.ctrl_var[sym]
 
         self.in_function = False
 
@@ -409,7 +331,6 @@ class Interpreter(SCVListener):
 
         if not self.valstack.empty():
             self.valstack.pop()
-        #print(self.symtable[sym]['value'])
 
         pprint(self.symtable)
 
@@ -491,12 +412,75 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#for_loop.
     def enterFor_loop(self, ctx:SCVParser.For_loopContext):
-        for_flag = 1
-        self.ctrl_var.add('i')
+        self.reading_ctrl_var = True
+        var = ctx.ID().getText()
+        if var in self.symtable:
+            raise Exception('Variable: ', var, 'no puede usarse como variable de control.', )
+        else :
+            self.ctrl_var.add(var)
+
+        self.symtable[var] = dict()
+
+        factor1 = int(ctx.for_inferior().factor().getText())
+        factor2 = int(ctx.for_superior().factor().getText())
+
+        if factor1 == factor2:
+            raise Exception('Limites definidos no válidos')
+        else:
+            increment = 1 if factor1 < factor2 else 0
+        
+        if ctx.REVERSE() is None :
+            if increment == 1 :
+                self.opstack.append('+')
+                self.valstack.append(var)
+                self.valstack.append(1)
+
+                gen_quad(self)
+            else :
+                raise Exception('Límites inválidos')
+            
+
+
+        self.jumps.append(len(self.ir_code)+1)
+
 
     # Exit a parse tree produced by SCVParser#for_loop.
     def exitFor_loop(self, ctx:SCVParser.For_loopContext):
-        for_flag = 0
+        cuad_jump = ['gotof', ' ', ' ']
+        self.ir_code.append(cuad_jump)
+
+        i = self.jumps.pop()
+        self.ir_code[-1].append(i)
+
+        for sym in self.ctrl_var:
+            del self.symtable[sym]
+
+        self.ctrl_var.clear()
+
+     # Enter a parse tree produced by SCVParser#loop_trigger1.
+    def enterLoop_trigger1(self, ctx:SCVParser.Loop_trigger1Context):
+        self.reading_ctrl_var = False
+
+    # Enter a parse tree produced by SCVParser#for_inferior.
+    def enterFor_inferior(self, ctx:SCVParser.For_inferiorContext):
+        pass
+
+    # Exit a parse tree produced by SCVParser#for_inferior.
+    def exitFor_inferior(self, ctx:SCVParser.For_inferiorContext):
+        pass
+
+
+    # Enter a parse tree produced by SCVParser#for_superior.
+    def enterFor_superior(self, ctx:SCVParser.For_superiorContext):
+        pass
+
+    # Exit a parse tree produced by SCVParser#for_superior.
+    def exitFor_superior(self, ctx:SCVParser.For_superiorContext):
+        pass
+    
+    # Exit a parse tree produced by SCVParser#loop_trigger1.
+    def exitLoop_trigger1(self, ctx:SCVParser.Loop_trigger1Context):
+        pass
 
 
     # Enter a parse tree produced by SCVParser#built_in_func.
@@ -506,8 +490,6 @@ class Interpreter(SCVListener):
     # Exit a parse tree produced by SCVParser#built_in_func.
     def exitBuilt_in_func(self, ctx:SCVParser.Built_in_funcContext):
         sym = ctx.id_list().ID().getText()
-        print(sym, ':=', self.symtable[sym]['value'])
-
 
     # Enter a parse tree produced by SCVParser#func_call.
     def enterFunc_call(self, ctx:SCVParser.Func_callContext):
@@ -597,7 +579,7 @@ class Interpreter(SCVListener):
     # Exit a parse tree produced by SCVParser#expression.
     def exitExpression(self, ctx:SCVParser.ExpressionContext):
         if not self.opstack.empty():
-            eval_bin(self)
+            gen_quad(self)
 
         print('OpStack',self.opstack)
         print('ValStack',self.valstack)
@@ -664,7 +646,7 @@ class Interpreter(SCVListener):
     # Exit a parse tree produced by SCVParser#rel_exp.
     def exitRel_exp(self, ctx:SCVParser.Rel_expContext):
         self.opstack.append(ctx.rel_operator().getText())
-        eval_bin(self)
+        gen_quad(self)
 
 
     # Enter a parse tree produced by SCVParser#num_exp.
@@ -677,7 +659,7 @@ class Interpreter(SCVListener):
         if not self.opstack.empty():
             operator = self.opstack.top()
             if not self.opstack.empty() and (operator == '*' or  operator == '/'):
-                eval_bin(self)
+                gen_quad(self)
 
     # Enter a parse tree produced by SCVParser#prod_exp.
     def enterProd_exp(self, ctx:SCVParser.Prod_expContext):
@@ -688,7 +670,7 @@ class Interpreter(SCVListener):
         if not self.opstack.empty():
             operator = self.opstack.top()
             if not self.opstack.empty() and (operator == '+' or  operator == '-'):
-                eval_bin(self)
+                gen_quad(self)
             print('OpStack',self.opstack)
             print('ValStack',self.valstack)
         
@@ -713,19 +695,20 @@ class Interpreter(SCVListener):
     # Enter a parse tree produced by SCVParser#factor.
     def enterFactor(self, ctx:SCVParser.FactorContext):
         #self.valstack.append(ctx.getText())
-        if for_flag == 0 :
-            if ctx.CTE_INT() :
-                self.valstack.append(int(ctx.getText()))
-            elif ctx.CTE_FLOAT() :
-                self.valstack.append(float(ctx.getText()))
-            elif ctx.num_exp():
-                self.opstack.append('(')
-            elif ctx.getText():
-                #print(ctx.getText())
-                #print(self.symtable[ctx.getText()])
-                self.valstack.append(self.symtable[ctx.getText()]['value'])
-        else:
-            self.valstack.append(self.symtable['i']['value'])
+        if self.reading_ctrl_var:
+            return
+        
+        if ctx.CTE_INT() :
+            self.valstack.append(int(ctx.getText()))
+        elif ctx.CTE_FLOAT() :
+            self.valstack.append(float(ctx.getText()))
+        elif ctx.num_exp():
+            self.opstack.append('(')
+        elif ctx.getText():
+            #print(ctx.getText())
+            #print(self.symtable[ctx.getText()])
+            self.valstack.append(ctx.getText())
+
         
         
     # Exit a parse tree produced by SCVParser#factor.
@@ -734,7 +717,7 @@ class Interpreter(SCVListener):
             operator = self.opstack.top()
 
             if operator == '*' or  operator == '/':
-                eval_bin(self)
+                gen_quad(self)
 
         if ctx.num_exp():
             self.opstack.append(')')
@@ -766,7 +749,6 @@ class Interpreter(SCVListener):
     # Exit a parse tree produced by SCVParser#sum_op.
     def exitSum_op(self, ctx:SCVParser.Sum_opContext):
         pass
-
 
     # Enter a parse tree produced by SCVParser#rel_operator.
     def enterRel_operator(self, ctx:SCVParser.Rel_operatorContext):

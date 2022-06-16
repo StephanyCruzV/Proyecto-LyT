@@ -242,6 +242,33 @@ class SCVListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by SCVParser#for_inferior.
+    def enterFor_inferior(self, ctx:SCVParser.For_inferiorContext):
+        pass
+
+    # Exit a parse tree produced by SCVParser#for_inferior.
+    def exitFor_inferior(self, ctx:SCVParser.For_inferiorContext):
+        pass
+
+
+    # Enter a parse tree produced by SCVParser#for_superior.
+    def enterFor_superior(self, ctx:SCVParser.For_superiorContext):
+        pass
+
+    # Exit a parse tree produced by SCVParser#for_superior.
+    def exitFor_superior(self, ctx:SCVParser.For_superiorContext):
+        pass
+
+
+    # Enter a parse tree produced by SCVParser#loop_trigger1.
+    def enterLoop_trigger1(self, ctx:SCVParser.Loop_trigger1Context):
+        pass
+
+    # Exit a parse tree produced by SCVParser#loop_trigger1.
+    def exitLoop_trigger1(self, ctx:SCVParser.Loop_trigger1Context):
+        pass
+
+
     # Enter a parse tree produced by SCVParser#built_in_func.
     def enterBuilt_in_func(self, ctx:SCVParser.Built_in_funcContext):
         pass
