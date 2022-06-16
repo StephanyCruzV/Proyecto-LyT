@@ -83,7 +83,6 @@ def gen_quad(self):
     else :
         pass
     
-    #print('====>', op, p)
 
     if op != ':=' :
         for i, _ in enumerate(p):
@@ -149,11 +148,11 @@ def eval_ir_code(self):
         if self.ir_code[pc] == 'halt':
             break
 
-        print(f'=== PC {pc} ===')
-        print(self.ir_code[pc])
-        pprint(self.symtable)
+        #print(f'=== PC {pc} ===')
+        #print(self.ir_code[pc])
+        #pprint(self.symtable)
         op = self.ir_code[pc][0]
-        print()
+        #print()
 
         p = list()
 
@@ -279,10 +278,13 @@ def eval_ir_code(self):
                 pc = self.ir_code[pc][3] - 1
 
         elif op == 'print':
-            print(self.symtable[p[0]]['value'])
+            print()
+            print(p[0], ":= ", self.symtable[p[0]]['value'])
 
         elif op == 'read':
-            self.symtable[p[0]]['value'] = input()
+            print()
+            print("Ingrese valor para: ", p[0])
+            self.symtable[p[0]]['value'] = float(input())
 
         # Realizar operaciones de asignación
         elif op == ':=':
@@ -316,7 +318,7 @@ class Interpreter(SCVListener):
 
     opstack = Stack()   # Stack para operadores
     valstack = Stack()  # Stack para valores
-    forstack = Stack()
+    forstack = Stack()  # Stack para manejo de vars de control fors
 
     ir_code = []        # Lista de cuadrúplos
 
@@ -332,8 +334,9 @@ class Interpreter(SCVListener):
 
     # Exit a parse tree produced by SCVParser#program.
     def exitProgram(self, ctx:SCVParser.ProgramContext):
-        self.ir_code.append('halt')
-        pprint(self.ir_code)
+        self.ir_code.append('halt')     # Cuadruplo para terminar ejecución
+        pprint(self.ir_code)            
+        print()
         eval_ir_code(self)
 
 
@@ -350,12 +353,14 @@ class Interpreter(SCVListener):
     def enterVar_decl(self, ctx:SCVParser.Var_declContext):
         sym = ctx.ID().getText()
 
+        # Validar si la vartiable ya esta declarada
         if sym in self.symtable:
-            report_error(ctx, f'duplicated variable "{sym}"')
+            report_error(ctx, f'Duplicated variable "{sym}"')
             exit()
 
         symtype = ctx.data_type().getText()
 
+        # Declarar variable en tabla 
         self.symtable[sym] = dict()
         self.symtable[sym]['type'] = symtype
 
@@ -364,11 +369,13 @@ class Interpreter(SCVListener):
         else:
             symvalue = ctx.var_spc().value_init().value_literal().getText()
             
+            # Convertir valor a Int o Float segun corresponda
             if symtype == 'int':
                 symvalue = int(symvalue)
             else:
                 symvalue = float(symvalue)
 
+            # Se agregar valores en Stack para hacer cuadruplo
             self.opstack.append(':=')
             self.valstack.append(sym)
             self.valstack.append(symvalue)
@@ -377,19 +384,10 @@ class Interpreter(SCVListener):
             if self.in_function:
                 self.symlocal.add(sym)
 
-            print(self.symtable)
+            #print(self.symtable)
 
     # Exit a parse tree produced by SCVParser#var_decl.
     def exitVar_decl(self, ctx:SCVParser.Var_declContext):
-        pass
-
-
-    # Enter a parse tree produced by SCVParser#value_init.
-    def enterValue_init(self, ctx:SCVParser.Value_initContext):
-        pass
-
-    # Exit a parse tree produced by SCVParser#value_init.
-    def exitValue_init(self, ctx:SCVParser.Value_initContext):
         pass
 
     # Enter a parse tree produced by SCVParser#funcs_decl.
@@ -504,6 +502,7 @@ class Interpreter(SCVListener):
     def enterAssignation(self, ctx:SCVParser.AssignationContext):
         sym = ctx.variable().getText()
 
+        # Appends en stacks para agregar asignación
         self.valstack.append(sym)
         self.opstack.append( ':=' )
 
@@ -514,7 +513,7 @@ class Interpreter(SCVListener):
         if not self.valstack.empty():
             self.valstack.pop()
 
-        pprint(self.symtable)
+        #pprint(self.symtable)
 
     # Enter a parse tree produced by SCVParser#if_block.
     def enterIf_block(self, ctx:SCVParser.If_blockContext):
@@ -526,7 +525,10 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#if_trigger.
     def enterIf_trigger(self, ctx:SCVParser.If_triggerContext):
+        # Trigger para generar cuadruplo de goto en falso
+        # Se coloca valor del valstack en cuadruplo
         cuad_jump = ['gotof', ' ', self.valstack.pop()]
+        # Se actualiza stack de saltos y se agrega cuadruplo
         self.jumps.append(len(self.ir_code))
         self.ir_code.append(cuad_jump)
 
@@ -537,7 +539,9 @@ class Interpreter(SCVListener):
     # Enter a parse tree produced by SCVParser#alter.
     def enterAlter(self, ctx:SCVParser.AlterContext):
         i = self.jumps.pop()    
+        # Se obtiene le proximo salto
         next_jump = len(self.ir_code) + 1
+        # Se actualiza cuadruplo con direccion de salto correcto
         self.ir_code[i].append(next_jump)
 
     # Exit a parse tree produced by SCVParser#alter.
@@ -671,28 +675,6 @@ class Interpreter(SCVListener):
     def enterLoop_trigger1(self, ctx:SCVParser.Loop_trigger1Context):
         self.reading_ctrl_var = False
 
-    # Enter a parse tree produced by SCVParser#for_inferior.
-    def enterFor_inferior(self, ctx:SCVParser.For_inferiorContext):
-        pass
-
-    # Exit a parse tree produced by SCVParser#for_inferior.
-    def exitFor_inferior(self, ctx:SCVParser.For_inferiorContext):
-        pass
-
-
-    # Enter a parse tree produced by SCVParser#for_superior.
-    def enterFor_superior(self, ctx:SCVParser.For_superiorContext):
-        pass
-
-    # Exit a parse tree produced by SCVParser#for_superior.
-    def exitFor_superior(self, ctx:SCVParser.For_superiorContext):
-        pass
-    
-    # Exit a parse tree produced by SCVParser#loop_trigger1.
-    def exitLoop_trigger1(self, ctx:SCVParser.Loop_trigger1Context):
-        pass
-
-
     # Enter a parse tree produced by SCVParser#built_in_func.
     def enterBuilt_in_func(self, ctx:SCVParser.Built_in_funcContext):
         sym = ctx.ID().getText()
@@ -774,7 +756,6 @@ class Interpreter(SCVListener):
     def exitDimensions_continuation(self, ctx:SCVParser.Dimensions_continuationContext):
         pass
 
-
     # Enter a parse tree produced by SCVParser#data_type.
     def enterData_type(self, ctx:SCVParser.Data_typeContext):
         pass
@@ -782,16 +763,6 @@ class Interpreter(SCVListener):
     # Exit a parse tree produced by SCVParser#data_type.
     def exitData_type(self, ctx:SCVParser.Data_typeContext):
         pass
-
-
-    # Enter a parse tree produced by SCVParser#value_literal.
-    def enterValue_literal(self, ctx:SCVParser.Value_literalContext):
-        pass
-
-    # Exit a parse tree produced by SCVParser#value_literal.
-    def exitValue_literal(self, ctx:SCVParser.Value_literalContext):
-        pass
-
 
     # Enter a parse tree produced by SCVParser#expression.
     def enterExpression(self, ctx:SCVParser.ExpressionContext):

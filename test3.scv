@@ -1,15 +1,12 @@
 
 function test_operations ( ) is
-    a : int := 1;
-    b : float := 4;
-    c : int := 2;
+    a : int := 0;
 begin
-    a:= 1; 
     
-    while a<5 loop
-    a := a + 1;
-    b := b + 2;
+    for i in 0 .. 9 loop
+        a := a + 1;
     end loop;
 
-    print (a);
+    print a;
+
 end test_operations;
