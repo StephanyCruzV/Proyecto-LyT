@@ -130,6 +130,11 @@ def gen_quad(self):
     #elif op == 'print':
         #self.valstack.append(0)
 
+
+#############################################################################################
+#                                     CLASE PARA EJECUTAR CUADRÚPLOS
+#############################################################################################
+
 def eval_ir_code(self):
     pc = -1
 
@@ -144,6 +149,8 @@ def eval_ir_code(self):
         pprint(self.symtable)
         op = self.ir_code[pc][0]
         print()
+
+        #print(self.ir_code)
 
         p = list()
 
@@ -160,8 +167,12 @@ def eval_ir_code(self):
             p.append(val1)
 
         elif op_nary[op] == UNI:
-            val0 = self.ir_code[pc][2]
-            p.append(val0)
+            if op == 'goto':
+                val0 = self.ir_code[pc][3]
+                p.append(val0)
+            else:
+                val0 = self.ir_code[pc][2]
+                p.append(val0)
         
         if op not in {':=', '++', '--'}:
             for i, _ in enumerate(p):
@@ -258,11 +269,11 @@ def eval_ir_code(self):
             self.symtable[p[0]]['value'] -= 1
 
         elif op == 'goto':
-            pc = p[0] - 1
+            pc = self.ir_code[pc][3] - 1
 
         elif op == 'gotof':
-            if p[0] == 1:
-                pc = p[0]
+            if p[0] == 0:
+                pc = self.ir_code[pc][3] - 1
 
         # Realizar operaciones de asignación
         elif op == ':=':
@@ -277,6 +288,8 @@ def eval_ir_code(self):
                     raise Exception(f'variable {p[0]} not declared')
             else:
                 raise Exception('unidentified', p[0])
+    
+    pprint(self.symtable)
 
 
 #############################################################################################
@@ -506,7 +519,7 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#if_trigger.
     def enterIf_trigger(self, ctx:SCVParser.If_triggerContext):
-        cuad_jump = ['gotof', self.valstack.pop(), ' ']
+        cuad_jump = ['gotof', ' ', self.valstack.pop()]
         self.jumps.append(len(self.ir_code))
         self.ir_code.append(cuad_jump)
 
@@ -564,8 +577,8 @@ class Interpreter(SCVListener):
 
     # Enter a parse tree produced by SCVParser#while_trigger.
     def enterWhile_trigger(self, ctx:SCVParser.While_triggerContext):
-        cuad_jump = ['gotof', self.valstack.pop(), ' ']
-        self.jumps.append(len(self.ir_code))
+        cuad_jump = ['gotof', ' ', self.valstack.pop()]
+        self.jumps.append(len(self.ir_code)+1)
         self.ir_code.append(cuad_jump)
 
     # Exit a parse tree produced by SCVParser#while_trigger.
