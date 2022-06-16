@@ -1,9 +1,20 @@
 function test_operations ( ) is
-    a : int := 1;
-begin
-    for i in 1..10 loop
-        a := a + 1;
-    end loop;
+    base : float := 0;
+    altura : float := 0;
+    h : float := 0;
 
-    print(a);
+    again : int := 0;
+begin
+    again := 1;
+
+    while again = 1 loop
+        base := read();
+        altura := read();
+
+        h := (base*altura)/2
+
+        print h;
+
+        again := read()
+    end loop;
 end test_operations;
