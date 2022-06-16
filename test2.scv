@@ -6,11 +6,11 @@ function test_operations ( ) is
 begin
 
     a := 1;
-    if a * 2 = 2 then
-        a := 0; 
+    if a * 3 = 2 then
+        a := 10; 
     else
         a := 2;
     end if;
 
-    print a;
+    print (a);
 end test_operations;

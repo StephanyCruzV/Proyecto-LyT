@@ -13,9 +13,9 @@ PARSER_FILES=\
 
 all: $(PARSER_FILES)
 	#python3 main.py test.scv
-	#python3 main.py test2.scv
+	python3 main.py test2.scv
 	#python3 main.py test3.scv
-	python3 main.py test4.scv
+	#python3 main.py test4.scv
 	#python3 main.py example1.scv
 
 $(PARSER_FILES): SCV.g4
