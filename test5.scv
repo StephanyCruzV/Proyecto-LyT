@@ -1,0 +1,73 @@
+function test_numeros ( ) is
+    cont_base : int := 10;
+    cont : int := 0;
+    num : int := 0;
+begin
+    num := read();
+
+    while cont_base < num loop
+        cont_base := cont_base * 10;
+
+        cont_base := cont_base / 10 ;
+
+        print cont_base;
+        print num;
+
+        while num > 0 loop
+            num := num - cont_base;
+            cont := cont + 1;
+        end loop;
+
+        if cont_base = 10 then
+            print uno;
+        end if;
+
+        if cont_base = 9 then
+            print nueve;
+        end if;
+
+        if cont_base = 8 then
+            print ocho;
+        end if;
+
+        if cont_base = 7 then
+            print siete;
+        end if;
+
+        if cont_base = 6 then
+            print seis;
+        end if;
+
+        if cont_base = 5 then
+            print cinco;
+        end if;
+
+        if cont_base = 4 then
+            print cuatro;
+        end if;
+
+        if cont_base = 3 then
+            print tres;
+        end if;
+
+        if cont_base = 2 then
+            print dos;
+        end if;
+
+        if cont_base = 1 then
+            print uno;
+        end if;
+
+        if cont_base = 0 then
+            print cero;
+        end if;
+
+        if cont_base != 1 then
+            cont_base := cont_base / 10;
+            cont := 0;
+        end if;
+
+    end loop;
+
+
+end test_numeros;

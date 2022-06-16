@@ -34,6 +34,7 @@ op_nary = {
     "<="    : BIN,
     ">="    : BIN,
     "="     : BIN,
+    "!="    : BIN,
     "and"   : BIN,
     "or"    : BIN,
     "++"    : UNI,
@@ -236,10 +237,13 @@ def eval_ir_code(self):
         elif op == '=':
             if p[1] == p[0] :
                 self.symtable[temp]['value'] = 1
-                #self.valstack.append(1)
             else :
                 self.symtable[temp]['value'] = 0
-                #self.valstack.append(0)
+        elif op == '!=':
+            if p[1] != p[0] :
+                self.symtable[temp]['value'] = 1
+            else :
+                self.symtable[temp]['value'] = 0
 
         # Realizar operaciones lógicas
         elif op == 'not':
@@ -279,7 +283,10 @@ def eval_ir_code(self):
 
         elif op == 'print':
             print()
-            print(p[0], ":= ", self.symtable[p[0]]['value'])
+            if p[0] in self.symtable:
+                print(p[0], ":= ", self.symtable[p[0]]['value'])
+            else:
+                print(p[0])
 
         elif op == 'read':
             print()
