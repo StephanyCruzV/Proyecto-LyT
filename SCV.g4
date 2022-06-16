@@ -133,8 +133,8 @@ for_superior    : factor ;
 
 loop_trigger1: ;
 
-built_in_func : PRINT '(' id_list ')' ';'
-            | variable ':=' READ '()' ';' ;
+built_in_func : PRINT ID';'
+            | ID ':=' READ '()' ';' ;
 
 func_call   : ID '(' params ')' ';' ;
 

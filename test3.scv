@@ -6,8 +6,9 @@ function test_operations ( ) is
 begin
     a:= 1; 
     
-    while a<10 loop
+    while a<5 loop
     a := a + 1;
+    b := b + 2;
     end loop;
 
     print (a);

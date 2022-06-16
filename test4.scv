@@ -1,9 +1,12 @@
 function test_operations ( ) is
-    a : int := 1;
+    a : int := 0;
+    b : int:= 0;
 begin
+    b := read();
+
     for i in 1..10 loop
         a := a + 1;
     end loop;
 
-    print(a);
+    print a;
 end test_operations;
