@@ -7,8 +7,8 @@ begin
     a:= 1; 
     
     while a<10 loop
-    a = a + 1
+    a := a + 1;
     end loop;
 
-    print a;
+    print (a);
 end test_operations;

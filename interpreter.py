@@ -1,4 +1,3 @@
-from select import select
 from antlr4 import *                #
 from SCVLexer import SCVLexer       #
 from SCVParser import SCVParser     #
@@ -37,9 +36,14 @@ op_nary = {
     "="     : BIN,
     "and"   : BIN,
     "or"    : BIN,
+    "++"    : UNI,
+    "--"    : UNI,
     "not"   : UNI,
     ":="    : BIN,
-    "print" : UNI
+    "print" : UNI,
+    "goto"  : UNI,
+    "gotof" : UNI,
+    "halt"  : UNI,
 }
 
 #############################################################################################
@@ -65,7 +69,6 @@ def gen_quad(self):
         else:
             c.append(val0)
             c.append(val1)
-
 
         p.append(val0)
         p.append(val1)
@@ -102,7 +105,19 @@ def gen_quad(self):
     global t_count
     temp = '_t' + str(t_count)
 
-    if op != ':=':
+    if op == '++':
+        self.valstack.append(p[i])
+        self.symtable[p[i]] = dict()
+
+        c.append(p[i])
+
+    elif op == '--':
+        self.valstack.append(p[i])
+        self.symtable[p[i]] = dict()
+
+        c.append(p[i])
+
+    elif op != ':=' :
         t_count += 1 
         self.valstack.append(temp)
         self.symtable[temp] = dict()
@@ -110,11 +125,158 @@ def gen_quad(self):
         c.append(temp)
 
     self.ir_code.append(c)
-    print(c)
 
     # Realizar operaciones Built_In
     #elif op == 'print':
         #self.valstack.append(0)
+
+def eval_ir_code(self):
+    pc = -1
+
+    while True:
+        pc += 1
+
+        if self.ir_code[pc] == 'halt':
+            break
+
+        print(f'=== PC {pc} ===')
+        print(self.ir_code[pc])
+        pprint(self.symtable)
+        op = self.ir_code[pc][0]
+        print()
+
+        p = list()
+
+        # Evaluar número de parametros necesarios para operación
+        if op_nary[op] == BIN:
+            if op == ':=':
+                val0 = self.ir_code[pc][1]
+                val1 = self.ir_code[pc][3]
+            else:
+                val0 = self.ir_code[pc][1]
+                val1 = self.ir_code[pc][2]
+                
+            p.append(val0)
+            p.append(val1)
+
+        elif op_nary[op] == UNI:
+            val0 = self.ir_code[pc][2]
+            p.append(val0)
+        
+        if op not in {':=', '++', '--'}:
+            for i, _ in enumerate(p):
+                if isinstance(p[i], int):
+                    continue
+                elif isinstance(p[i], float):
+                    continue
+                elif p[i].isidentifier():
+                    if p[i] in self.symtable:
+                        p[i] = self.symtable[p[i]]['value']
+                        continue
+                    elif p[i][0] == '_':
+                        continue
+
+        temp = self.ir_code[pc][3]
+
+        if op ==  '+':
+            self.symtable[temp]['value'] = p[1] + p[0]
+            #self.valstack.append(p[1] + p[0])
+        elif op == '-':
+            self.symtable[temp]['value'] = p[1] - p[0]
+            #self.valstack.append(p[1] - p[0])
+        elif op == '*':
+            self.symtable[temp]['value'] = p[1] * p[0]
+            #self.valstack.append(p[1] * p[0])
+        elif op == '/':
+            self.symtable[temp]['value'] = p[1] / p[0]
+            #self.valstack.append(p[1] / p[0])
+
+        # Realizar operaciones relacionales
+        elif op == '>':
+            if p[1] > p[0] :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+            else :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+        elif op == '<':
+            if p[1] < p[0] :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+            else :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+        elif op == '>=':
+            if p[1] >= p[0] :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+            else :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+        elif op == '<=':
+            if p[1] <= p[0] :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+            else :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+        elif op == '=':
+            if p[1] == p[0] :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+            else :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+
+        # Realizar operaciones lógicas
+        elif op == 'not':
+            if p[0] == 1 :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+            else :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+        elif op == 'and':
+            if p[1] == 1 and p[0] == 1 :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+            else :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+        elif op == 'or':
+            if p[1] == 1 or p[0] == 1 :
+                self.symtable[temp]['value'] = 1
+                #self.valstack.append(1)
+            else :
+                self.symtable[temp]['value'] = 0
+                #self.valstack.append(0)
+
+        elif op == '++':
+            self.symtable[p[0]]['value'] += 1
+
+        elif op == '--':
+            self.symtable[p[0]]['value'] -= 1
+
+        elif op == 'goto':
+            pc = p[0] - 1
+
+        elif op == 'gotof':
+            if p[0] == 1:
+                pc = p[0]
+
+        # Realizar operaciones de asignación
+        elif op == ':=':
+            if isinstance(p[0], int):
+                self.symtable[p[1]]['value'] = p[0]
+            elif isinstance(p[0], float):
+                self.symtable[p[1]]['value'] = p[0]
+            elif p[0].isidentifier():
+                if p[0] in self.symtable:
+                    self.symtable[p[1]]['value'] = self.symtable[p[0]]['value']
+                else:
+                    raise Exception(f'variable {p[0]} not declared')
+            else:
+                raise Exception('unidentified', p[0])
 
 
 #############################################################################################
@@ -131,6 +293,7 @@ class Interpreter(SCVListener):
 
     opstack = Stack()   # Stack para operadores
     valstack = Stack()  # Stack para valores
+    forstack = Stack()
 
     ir_code = []        # Lista de cuadrúplos
 
@@ -146,7 +309,9 @@ class Interpreter(SCVListener):
 
     # Exit a parse tree produced by SCVParser#program.
     def exitProgram(self, ctx:SCVParser.ProgramContext):
-        pass
+        self.ir_code.append('halt')
+        pprint(self.ir_code)
+        eval_ir_code(self)
 
 
     # Enter a parse tree produced by SCVParser#vars_decl.
@@ -219,9 +384,6 @@ class Interpreter(SCVListener):
 
     # Exit a parse tree produced by SCVParser#func_decl.
     def exitFunc_decl(self, ctx:SCVParser.Func_declContext):
-        for sym in self.symlocal:
-            del self.symtable[sym]
-
         self.in_function = False
 
 
@@ -424,38 +586,65 @@ class Interpreter(SCVListener):
         factor1 = int(ctx.for_inferior().factor().getText())
         factor2 = int(ctx.for_superior().factor().getText())
 
-        if factor1 == factor2:
-            raise Exception('Limites definidos no válidos')
-        else:
-            increment = 1 if factor1 < factor2 else 0
+        self.valstack.append(var)
+        self.valstack.append(factor1)
+        self.opstack.append(':=')
+        gen_quad(self)
         
         if ctx.REVERSE() is None :
-            if increment == 1 :
-                self.opstack.append('+')
-                self.valstack.append(var)
-                self.valstack.append(1)
-
-                gen_quad(self)
-            else :
-                raise Exception('Límites inválidos')
+            if factor1 == factor2:
+                raise Exception('3. Limites definidos no válidos')
+            elif factor1 < factor2:
+                self.forstack.append({
+                    'dir': 'normal',
+                    'ctrl': var,
+                    'factor2': factor2,
+                })
+            else:
+                raise Exception('4. Limites definidos no válidos')
+        else:
+            if factor1 == factor2:
+                raise Exception('1. Limites definidos no válidos')
+            elif factor1 > factor2:
+                self.forstack.append({
+                    'dir': 'rev',
+                    'ctrl': var,
+                    'factor2': factor2,
+                })
+            else:
+                raise Exception('2. Limites definidos no válidos')
             
 
 
-        self.jumps.append(len(self.ir_code)+1)
+        self.jumps.append(len(self.ir_code))
 
 
     # Exit a parse tree produced by SCVParser#for_loop.
     def exitFor_loop(self, ctx:SCVParser.For_loopContext):
-        cuad_jump = ['gotof', ' ', ' ']
+        for_info = self.forstack.pop()
+
+        if for_info['dir'] == 'rev':
+            self.opstack.append('--')
+        else:
+            self.opstack.append('++')
+        
+        self.valstack.append(for_info['ctrl'])
+        gen_quad(self)
+
+        if for_info['dir'] == 'rev':
+            self.opstack.append('>')
+        else:
+            self.opstack.append('<')
+
+        self.valstack.append(for_info['ctrl'])
+        self.valstack.append(for_info['factor2'])
+        gen_quad(self)
+
+        cuad_jump = ['gotof', ' ', self.valstack.pop()]
         self.ir_code.append(cuad_jump)
 
         i = self.jumps.pop()
         self.ir_code[-1].append(i)
-
-        for sym in self.ctrl_var:
-            del self.symtable[sym]
-
-        self.ctrl_var.clear()
 
      # Enter a parse tree produced by SCVParser#loop_trigger1.
     def enterLoop_trigger1(self, ctx:SCVParser.Loop_trigger1Context):
@@ -580,10 +769,6 @@ class Interpreter(SCVListener):
     def exitExpression(self, ctx:SCVParser.ExpressionContext):
         if not self.opstack.empty():
             gen_quad(self)
-
-        print('OpStack',self.opstack)
-        print('ValStack',self.valstack)
-
 
     # Enter a parse tree produced by SCVParser#bool_exp.
     def enterBool_exp(self, ctx:SCVParser.Bool_expContext):
